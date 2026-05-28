@@ -21,6 +21,14 @@ El flujo de trabajo se despliega de forma visual e intuitiva en n8n, estructurá
 * **Google Gemini Chat Model:** Integración directa con la API de Google Gemini, configurado con un *System Prompt* personalizado que define la personalidad del asistente, las directrices del restaurante, la estructura de precios y las políticas de atención.
 * **Window Buffer Memory:** Componente de memoria adjunto al agente que le permite retener el hilo y contexto de las últimas interacciones de la conversación con el cliente, asegurando una experiencia cohesiva.
 
+## 📋 Formularios de Captura de Datos (Tally)
+Para optimizar los procesos operativos que requieren estructuras de datos fijas y validaciones complejas (como direcciones o horarios), el sistema se integra con formularios web interactivos desarrollados en **Tally**. Puedes auditar las interfaces públicas utilizadas a través de los siguientes enlaces:
+
+* 🛵 **Entrega a Domicilio - "El Olivo":** [Formulario de Delivery en Tally](https://tally.so/r/lbq40V)
+* 🍽️ **Reserva de Mesa - "El Olivo":** [Formulario de Reserva de Mesa en Tally](https://tally.so/r/Xxrz5d)
+
+*Nota: Las respuestas registradas en estos formularios disparan Webhooks en tiempo real hacia n8n para ejecutar flujos paralelos de validación de disponibilidad y almacenamiento automatizado en hojas de cálculo.*
+
 ## 🚀 Instrucciones de Configuración e Importación
 
 Para replicar o auditar este flujo de trabajo en tu propia instancia de n8n:
@@ -36,6 +44,7 @@ Para replicar o auditar este flujo de trabajo en tu propia instancia de n8n:
    - **Google Gemini API:** Obtén tu API Key desde Google AI Studio e instálala en el nodo del modelo de chat.
 
 3. **Activar:** Guarda los cambios y activa el interruptor (**Active**) en la parte superior derecha de n8n.
+
 
 ---
 *Este proyecto fue desarrollado con fines educativos y de portafolio para demostrar la viabilidad de arquitecturas No-Code/Low-Code potenciadas con Inteligencia Artificial generativa.*
