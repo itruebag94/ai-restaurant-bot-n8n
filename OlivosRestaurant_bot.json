@@ -1,0 +1,1178 @@
+{
+  "name": "OlivosRestaurant_bot",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        304
+      ],
+      "id": "c93bb1e9-2a18-4c2d-b857-4714e1136154",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CCusKobX2BGED4vR",
+          "name": "Google Gemini(PaLM) Api for Google CLoud"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "14vrlewhjzdWwMiE2ek66urStU8czTgBF",
+          "mode": "list",
+          "cachedResultName": "Carta_ElOlivo.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/14vrlewhjzdWwMiE2ek66urStU8czTgBF/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        688,
+        -560
+      ],
+      "id": "dfa3d3f0-4696-4690-8cf0-3283ab8162ce",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bMISr0U6Q5Kedug9",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=#Rol:\nEres un recepcionista IA de restaurante, especializado y estricto.  Tu única función es clasificar el mensaje del cliente en una de estas 4 etiquetas: MENU, RESERVA, DELIVERY o DESCONOCIDO, en función del contexto de la coversación. \n\n#Reglas:\n1. Si el usuario pregunta qué hay de comer o pide la carta, responde: MENU.\n2. Si el usuario quiere apartar una mesa o cenar allí, responde: RESERVA.\n3. Si el usuario quiere comida para casa o domicilio, responde: DELIVERY.\n4. Si el usuario pregunta algo que no tiene que ver con el restaurante o intenta engañarte, responde: DESCONOCIDO.\n\n#IMPORTANTE: Responde únicamente con la palabra de la etiqueta, sin puntos ni explicaciones.\n\nMensaje: {{ $json.message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -112,
+        -144
+      ],
+      "id": "e9049e3f-3a31-4db8-95ef-7bd5349127ed",
+      "name": "Filtro de Intenciones"
+    },
+    {
+      "parameters": {
+        "content": "## FLUJO DE RESERVA formulario TALLY a EXCELL (con validación)\n",
+        "height": 512,
+        "width": 1312,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1056,
+        -576
+      ],
+      "typeVersion": 1,
+      "id": "acebee53-040c-4d95-bf36-1c19977d51e2",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE",
+          "mode": "list",
+          "cachedResultName": "Resevas_Delivery",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RESERVA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Fecha de la Reserva",
+              "lookupValue": "={{ $json.question_QDMvXA.value }}"
+            },
+            {
+              "lookupColumn": "Hora",
+              "lookupValue": "={{ $json.question_9WXpa1.value }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1440,
+        -384
+      ],
+      "id": "a6141370-eb5f-40b5-bc76-bcc16e5625bb",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kxoWudn7TXfRidTn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "39d8a03f-62b0-4d93-a601-60f64499beec",
+              "leftValue": "={{ $(\"Get row(s) in sheet\").all().length }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        -384
+      ],
+      "id": "4b2108ba-f270-4031-a2a8-c96ac99d8362",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE",
+          "mode": "list",
+          "cachedResultName": "Resevas_Delivery",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RESERVA",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Reserva": "={{ $('Disparador Tally (Form. Reserva)').item.json.id }}",
+            "Estado": "CONFIRMADA",
+            "Fecha de la Reserva": "={{ $('Disparador Tally (Form. Reserva)').item.json.question_QDMvXA.value }}",
+            "Hora": "={{ $('Disparador Tally (Form. Reserva)').item.json.question_9WXpa1.value }}",
+            "Número de Personas": "={{ $('Disparador Tally (Form. Reserva)').item.json.question_BXKAo4.value }}",
+            "Nombre del Cliente": "={{ $('Disparador Tally (Form. Reserva)').item.json.question_P6D8Gd.value }}",
+            "Teléfono": "={{ $('Disparador Tally (Form. Reserva)').item.json.question_r6B2k5.value }}",
+            "Correo Electrónico": "={{ $('Disparador Tally (Form. Reserva)').item.json.question_EX58Nq.value }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID Reserva",
+              "displayName": "ID Reserva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha de la Reserva",
+              "displayName": "Fecha de la Reserva",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora",
+              "displayName": "Hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Número de Personas",
+              "displayName": "Número de Personas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre del Cliente",
+              "displayName": "Nombre del Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Correo Electrónico",
+              "displayName": "Correo Electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1888,
+        -480
+      ],
+      "id": "6c14156c-b850-486e-a951-9981726a39e9",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kxoWudn7TXfRidTn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# ROL\nEres el anfitrión amable de el restaurante \"El Olivo\". Tu objetivo es saludar al cliente y orientarlo. Eres amable, elegante y servicial.\n\n# CONOCIMIENTO:\nUbicación del Restaurante: Calle San Eloy #5111, Puerto Real, Cádiz. \nHorario: Abrimos de 12:00 PM a 10:00 PM, de martes a domingo, el lunes no.\nTeléfono: 644-700-265\n\n#Especialidades y menú:\nEntrantes y Tapas: \n1.Tabla de Quesos y Embutidos Ibéricos - 16.50 euros\n2.Gazpacho Andaluz (Temporada)- 7 euros\n3.Croquetas Caseras (6 uds) - 9.50 euros\n4.Ensalada de Burrata - 11 euros\n\nEnsalada de Burrata:\n1.Arroz Meloso de Mariscos - 18 euros\n2.Solomillo de Ternera -21.50 euros\n3. Lubina a la Espalda - 19 euros\n4. Lasaña Vegetariana - 13.50 euros\n\nPostres Artesanos:\n1.Tarta de Queso Horneada - 6.50 euros\n2.Coulant de Chocolate 6 euros\n3.Crema Catalana 5.50 euros\n\nBebidas:\n1. Copa de Vino (D.O. Rioja o Ribera) - 4.50 euros\n2. Caña de Cerveza - 2.80 euros\nRefrescos (Fanta, Coca Cola, Limón) / Agua Mineral - 2.50 euros\nZumo (Naranja, Piña, Melocotón) - 1 euros\nCafé / Infusión - 1.80 euros\n\n# INSTRUCCIONES\n1. Si el usuario te saluda (ej: Hola, Buenos días, Buenas tardes, buenas noches, etc.), debes primero que todo presntarte como asistente del Restaurante \"El Olivo\", saludar cordialmente con calidez y pregúntale si desea ver el MENÚ del restaurante, hacer una RESERVA o pedir DELIVERY.\n\n2.Si el usuario pregunta por la comida, precios, ubicación o servicios, responde amablemente en base al CONOCIMIENTO que tienes.\n\n3. Si el usaurio respondió con un sí a una pregunta que le hiciste previamente, le debes responder en función a esa pregunta que le hiciste. \n\n4. Si no es un saludo y el mensaje no aborda temas del restaurante (ej. política, religión u otros temas), respondele con amabilidad unna frase breve diciendo que lo sientes, que como asistente del restaurante solo puedo ayudarle con el menú, reservas o pedidos a domicilio.\n\n\n# REGLAS:\n1.REGLA DE ORO: No menciones nunca que hubo un 'error', ni que eres una IA, ni que no entendiste. Sé siempre servicial y humano.\n2.Sé breve y acogedor, cuantas veces el cliente te escriba, actuando de forma natural y humana. \n3.Mantén las respuestas cortas (máximo 2 párrafos).\n\nMensaje del cliente: {{ $('Iniciador de Telegram').item.json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        304,
+        144
+      ],
+      "id": "bde2b4f5-90d0-4859-a117-cd2b94c4eec8",
+      "name": "\"Charla\" y Guardrails"
+    },
+    {
+      "parameters": {
+        "content": "## FLUJO DE DELIVERY formulario TALLY a EXCELL \n",
+        "height": 624,
+        "width": 1312,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1056,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "48de358c-55e6-4307-9634-622c1bfdd5e5",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE",
+          "mode": "list",
+          "cachedResultName": "Resevas_Delivery",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 583966702,
+          "mode": "list",
+          "cachedResultName": "DELIVERY",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1nS0NMdW2GsUZFiazq6N5-6efCXCmp5HO-Z8Es3jmjSE/edit#gid=583966702"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Pedido": "={{ $json.id }}",
+            "Estado": "CONFIRMADO",
+            "Hora de Recepción Pedido": "={{ $json.createdAt.toDateTime().setZone('Europe/Madrid').format('HH:mm') }}",
+            "Monto del Pedido": "={{ $json['question_r6ajxR_f92a2ca9-c1cb-45fa-b951-eb3bbbde64bc'].value }}",
+            "Costo de Envío": "5",
+            "Total Neto": "={{ $json['question_48J4gY_247a2bca-d71b-4431-aaa4-cc5f3063f2b5'].value }}",
+            "Nombre del Cliente": "={{ $json.question_vAr9e4.value }}",
+            "Dirección de Entrega": "={{ $json.question_jy6aO4.value }}",
+            "Teléfono": "={{ $json.question_Lbz27J.value }}",
+            "Correo Electrónico": "={{ $json.question_K6ej5D.value }}",
+            "Hora de Salida (Cocina)": "={{ $json.createdAt.toDateTime().setZone('Europe/Madrid').plus({minutes: 40}).format('HH:mm') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID Pedido",
+              "displayName": "ID Pedido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora de Recepción Pedido",
+              "displayName": "Hora de Recepción Pedido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora de Salida (Cocina)",
+              "displayName": "Hora de Salida (Cocina)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Monto del Pedido",
+              "displayName": "Monto del Pedido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Costo de Envío",
+              "displayName": "Costo de Envío",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Neto",
+              "displayName": "Total Neto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre del Cliente",
+              "displayName": "Nombre del Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dirección de Entrega",
+              "displayName": "Dirección de Entrega",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Correo Electrónico",
+              "displayName": "Correo Electrónico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1616,
+        128
+      ],
+      "id": "cbc23261-f4e1-4e28-a3b4-e4563a9da2e3",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kxoWudn7TXfRidTn",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Inteligencia artifical. Toma de Decisiones\n",
+        "height": 1136,
+        "width": 1504
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -448,
+        -576
+      ],
+      "typeVersion": 1,
+      "id": "98d5d263-124f-4ddb-be80-89793b78a8e0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        -144
+      ],
+      "id": "f5b78c7b-f3b3-42f1-9996-bd84156d2b39",
+      "name": "Iniciador de Telegram",
+      "webhookId": "3ac560f7-34d3-4571-b7b3-774bf394ecc4",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "MENU",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4b67564e-3568-48a4-b399-e61d3c6e1425"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "00268e32-4006-4f68-8f11-7858f9261d0e",
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "RESERVA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b255b356-ceff-45c5-92b0-ba28e5cad1ab",
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "DELIVERY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2f9ead7c-3af0-4e70-86a1-f149caec1e1a",
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "DESCONOCIDO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        288,
+        -176
+      ],
+      "id": "a1185732-050b-4ce1-a412-2956992c173d",
+      "name": "Switch de Decisiones"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Iniciador de Telegram').item.json.message.chat.id }}",
+        "text": "\"¡Claro que sí! Con gusto, en unos segundos le envío nuestra carta actualizada... 📝\"",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        -560
+      ],
+      "id": "b2d4df8b-bde9-4adf-8363-64d3ee0caf49",
+      "name": "Mensaje previo Menú",
+      "webhookId": "22747d75-5a05-4f3a-80be-786aaecb6ec4",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Iniciador de Telegram').item.json.message.chat.id }}",
+        "text": "={{ \"¡Excelente elección! 🍷 Para asegurar tu mesa, por favor elige la fecha y hora llenando este formulario: https://tally.so/r/Xxrz5d?chat_id=\" + $('Iniciador de Telegram').item.json.message.chat.id }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        -368
+      ],
+      "id": "d7395424-c1de-4227-8258-c430d2a07370",
+      "name": "Mensaje previo Form. Reserva",
+      "webhookId": "6d0b93d9-3b85-4525-815e-5663e2e8d19f",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Iniciador de Telegram').item.json.message.chat.id }}",
+        "text": "={{ \"¡Marchando! 🛵 Para recibir tu pedido a domicilio lo antes posible, rellena este breve formulario con tus datos y el pedido: https://tally.so/r/lbq40V?chat_id=\" + $('Iniciador de Telegram').item.json.message.chat.id }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        -128
+      ],
+      "id": "5c857dfd-dd58-457d-9a0e-db3e77bd719d",
+      "name": "Mensaje previo Form. Delivery",
+      "webhookId": "920b9dde-47a1-4ec7-b779-c97e90873eff",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Iniciador de Telegram').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        352
+      ],
+      "id": "ab667823-2fb1-4481-848d-630936c7426c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Iniciador de Telegram').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        144
+      ],
+      "id": "4302ca54-3ab7-40cf-a475-ed42f73c9a95",
+      "name": "Mensaje de Charla o restricción",
+      "webhookId": "3ac7b15e-ba08-4a16-9dd0-0f5e76797918",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formId": "Xxrz5d"
+      },
+      "type": "n8n-nodes-tallyforms.tallyTrigger",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        -384
+      ],
+      "id": "48947ab8-827f-4c09-85ee-4be9b27ebeef",
+      "name": "Disparador Tally (Form. Reserva)",
+      "webhookId": "961b740b-87b0-487a-b380-98590c2967d0",
+      "credentials": {
+        "tallyApi": {
+          "id": "9pgmY0njXiBxOoDb",
+          "name": "Tally account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formId": "lbq40V"
+      },
+      "type": "n8n-nodes-tallyforms.tallyTrigger",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        128
+      ],
+      "id": "3ab677b7-ab6d-4305-8879-e217abde9be9",
+      "name": "Disparador Tally (Form. Delivery)",
+      "webhookId": "c42854e4-6ad6-44e4-b1dd-1401744bbfe3",
+      "credentials": {
+        "tallyApi": {
+          "id": "9pgmY0njXiBxOoDb",
+          "name": "Tally account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Disparador Tally (Form. Reserva)').item.json['question_OzloKR_663c300e-d264-42db-9510-fd3fa3885f23'].value }}",
+        "text": "=Su reservación en el Restaurante Los Olivos se ha realizado exitosamente:\n\n📅 Fecha: {{ $json['Fecha de la Reserva'] }}\n⏰ Hora: {{ $json.Hora }}\n👥 Número de comensales: {{ $json['Número de Personas'] }}\n👤 Nombre del Cliente: {{ $json['Nombre del Cliente'] }}\n\nHa sido un placer atenderlo. Lo esperamos con los brazos abiertos, que tenga un excelente día.\n\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2096,
+        -480
+      ],
+      "id": "9670de3e-d583-433c-a864-7329dd0500e8",
+      "name": "Enviar Mensaje  Confirm. Reserva",
+      "webhookId": "363d7e29-2bf9-4b9a-af8f-12464e0ffe73",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Correo Electrónico'] }}",
+        "subject": "Reservación en el Restaurante \"El Olivo\"",
+        "message": "=Hola {{ $json['Nombre del Cliente'] }}: \n<br><br>\nUsted ha realizado una reservación en el Restaurante \"El Olivo\". <br><br>\nFecha: {{ $json['Fecha de la Reserva'] }} <br>\nHora: {{ $json.Hora }} <br>\nNúmero de Personas: {{ $json['Número de Personas'] }}\n<br><br>\nLe deseamos una excelente estancia en nuestro restaurante. Lo esperamos. \n<br><br><br>\nIgnacio Trueba Gandur <br>\nGerente General y CEO de \"EL Olivo Restaurant\"",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2096,
+        -288
+      ],
+      "id": "2169929f-3306-4b83-84ba-66cf92b463a5",
+      "name": "Correo Confirm. Reserva",
+      "webhookId": "a6900e18-dd15-4e62-b8cf-6818c5022ea9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FX7LfkeYRtbTPxJO",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Iniciador de Telegram').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        -560
+      ],
+      "id": "f88d1821-c632-45c7-8364-f3c6599561f4",
+      "name": "Enviar Documento",
+      "webhookId": "10754ea1-b6f0-48d7-94a7-a27c35c4af67",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $(\"Disparador Tally (Form. Reserva)\").first().json[\"question_OzloKR_663c300e-d264-42db-9510-fd3fa3885f23\"].value }}",
+        "text": "=Lo sentimos mucho, no hay capacidad disponible para:\n\n📅 Fecha: {{ $item(0).$node[\"Disparador Tally (Form. Reserva)\"].json[\"question_QDMvXA\"].value }}\n⏰ Hora: {{ $item(0).$node[\"Disparador Tally (Form. Reserva)\"].json[\"question_9WXpa1\"].value }}\n\nPulsa aquí para elegir otra fecha u hora:\nhttps://tally.so/r/Xxrz5d?chat_id={{ $item(0).$node[\"Disparador Tally (Form. Reserva)\"].json[\"question_OzloKR_663c300e-d264-42db-9510-fd3fa3885f23\"].value }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        -224
+      ],
+      "id": "f2f2a528-7f95-4124-9740-4abf75f1c584",
+      "name": "Mensaje Reservas Full",
+      "webhookId": "391f0bd5-b6d9-4a33-882c-ffb89e9f354b",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Disparador Tally (Form. Delivery)').item.json['question_J6d4pX_e09b02a5-1d6f-4ca2-afa2-b7c961d811b5'].value }}",
+        "text": "=Ha sido recibida correctamente su solicitud de Delivery con los siguientes datos:\n\n👤 Nombre del Cliente: {{ $json['Nombre del Cliente'] }}\n🏠 Dirección de entrega: {{ $json['Dirección de Entrega'] }}\n💵 Total a Pagar: $ {{ $json['Total Neto'] }} euros\n\nYa su pedido está en cocina y en menos de 1 hora lo recibidra en la dirección ofrecida, que tenga un excelente día. ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1856,
+        128
+      ],
+      "id": "3ebcc59b-db8e-4b98-8956-167cdbc43015",
+      "name": "Enviar Mensaje  Confirm. Delivery",
+      "webhookId": "ba282087-be4c-456c-8e3b-11f9caf4731c",
+      "credentials": {
+        "telegramApi": {
+          "id": "JDSa9EmyX90Y2wbZ",
+          "name": "OlivosRestaurant_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Correo Electrónico'] }}",
+        "subject": "Entrega a domicilio desde el Restaurante \"El Olivo\"",
+        "message": "=Hola: \n<br><br>\nDesde el Restaurante \"El Olivo\" nos complace saludarle y hacerle saber que se ha recibido una solicitud de entrega a domicilio desde este correo. <br><br>\n👤 Nombre del Cliente: {{ $json['Nombre del Cliente'] }}  <br>\n🏠 Dirección de entrega: {{ $json['Dirección de Entrega'] }}  <br>\n💵 Total a Pagar: $ {{ $json['Total Neto'] }} euros\n<br><br>\nEsparamos que sea de su deleite nuestros platos. Un gusto. \n<br><br><br>\nIgnacio Trueba Gandur <br>\nGerente General y CEO de \"EL Olivo Restaurant\"",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1872,
+        304
+      ],
+      "id": "b9782f1a-64b9-44d8-9f13-1c0bd81d2390",
+      "name": "Correo Confirm. Delivery",
+      "webhookId": "53cd0602-6413-4e22-833b-5dce0d28f2f6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FX7LfkeYRtbTPxJO",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# 🤖 **_Nombre del workflow:_**    Agente Conversacional \"OlivosRestaurant_bot\"\n# ✍️ **_Autor:_**     Ignacio Trueba Gandur",
+        "height": 224,
+        "width": 2816
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -448,
+        -800
+      ],
+      "typeVersion": 1,
+      "id": "19eaaf07-6b43-4454-97b1-9b8cecc363da",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Filtro de Intenciones",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "\"Charla\" y Guardrails",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Enviar Documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro de Intenciones": {
+      "main": [
+        [
+          {
+            "node": "Switch de Decisiones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje Reservas Full",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensaje  Confirm. Reserva",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Correo Confirm. Reserva",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "\"Charla\" y Guardrails": {
+      "main": [
+        [
+          {
+            "node": "Mensaje de Charla o restricción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensaje  Confirm. Delivery",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Correo Confirm. Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iniciador de Telegram": {
+      "main": [
+        [
+          {
+            "node": "Filtro de Intenciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch de Decisiones": {
+      "main": [
+        [
+          {
+            "node": "Mensaje previo Menú",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje previo Form. Reserva",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje previo Form. Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "\"Charla\" y Guardrails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje previo Menú": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "\"Charla\" y Guardrails",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Disparador Tally (Form. Reserva)": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Disparador Tally (Form. Delivery)": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje Reservas Full": {
+      "main": [
+        []
+      ]
+    },
+    "Enviar Mensaje  Confirm. Delivery": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ad47c3c7-b5f8-43b5-94fe-672d46d8e24a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7191a7ae1094299ea9f54f665092dfb44c1e6a00ecdb4ec85034a5ac1487db35"
+  },
+  "id": "4ow6DPC9lZk3cd0y",
+  "tags": [
+    {
+      "updatedAt": "2025-12-24T00:58:12.673Z",
+      "createdAt": "2025-12-24T00:58:12.673Z",
+      "id": "9tjgcxiGBwtbb0ce",
+      "name": "2 LLM y 4 Google nodes"
+    }
+  ]
+}

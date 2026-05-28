@@ -1,0 +1,12 @@
+# Archivos de configuración local y variables de entorno (Evita subir API Keys)
+.env
+*.env
+
+# Archivos de registros y logs de ejecución
+*.log
+logs/
+
+# Archivos de sistema y basura
+.DS_Store
+Thumbs.db
+__pycache__/
